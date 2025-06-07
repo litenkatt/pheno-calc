@@ -3,14 +3,15 @@
 
 import {
   Box,
-  Button,
+  debounce,
   Grid,
   MenuItem,
   Paper,
+  Slider,
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Bar,
@@ -29,7 +30,8 @@ export default function PhenoCalculator() {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isValid },
+    formState: { errors },
+    trigger,
   } = useForm({ mode: "onChange", defaultValues });
 
   const [result, setResult] = useState<{
@@ -38,8 +40,7 @@ export default function PhenoCalculator() {
     accel: number;
   } | null>(null);
 
-  /** ---- kalkyl ---- */
-  const onSubmit = (data: PhenoFormValues) => {
+  const onSubmit = useCallback((data: PhenoFormValues) => {
     // Build a context with WBC first (needed for abs lymph conversion)
     console.log(data);
     const wbcInputRaw = parseFloat(data["wbcValue"]);
@@ -52,8 +53,8 @@ export default function PhenoCalculator() {
     const modelVals: Record<string, number> = { wbc: wbcModel };
 
     BIOMARKERS.forEach((b) => {
-      const raw = parseFloat(data[`${b.id}Value`]);
-      const unitKey = data[`${b.id}Unit`];
+      const raw = parseFloat(data[`${b.id}Value` as keyof PhenoFormValues]);
+      const unitKey = data[`${b.id}Unit` as keyof PhenoFormValues];
       // debugger;
       const unitObj = b.units.find((u) => u.value === unitKey)!;
       const converted =
@@ -110,9 +111,23 @@ export default function PhenoCalculator() {
       141.50225 + Math.log(-0.00553 * Math.log(1 - mortSafe)) / 0.090165;
 
     setResult({ chrono: ageYears, pheno, accel: pheno - ageYears });
-  };
+  }, []);
 
-  /** ---- render ---- */
+  const debouncedSubmit = useRef(
+    debounce((data: PhenoFormValues) => {
+      trigger().then((valid) => {
+        if (valid) onSubmit(data);
+      });
+    }, 300)
+  ).current;
+
+  useEffect(() => {
+    const subscription = watch((data, { name }) => {
+      if (name) debouncedSubmit(data as PhenoFormValues);
+    });
+    return () => subscription.unsubscribe();
+  }, [debouncedSubmit, watch, trigger]);
+
   return (
     <Paper sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
       <Typography variant="h5" gutterBottom>
@@ -139,61 +154,96 @@ export default function PhenoCalculator() {
           )}
         />
 
-        {/* Biomarker grid */}
         <Grid container spacing={2}>
-          {BIOMARKERS.map((b) => (
-            <Grid size={{ xs: 12, sm: 6 }} key={b.id}>
-              <Controller
-                name={`${b.id}Value`}
-                control={control}
-                rules={{
-                  required: "Obligatoriskt",
-                  // min: { value: b.min, message: `Min ${b.min}` },
-                  // max: { value: b.max, message: `Max ${b.max}` },
-                  validate: (v) =>
-                    v === "" || isNaN(Number(v)) ? "Måste vara ett tal" : true,
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={b.label}
-                    type="number"
-                    fullWidth
-                    error={!!errors[`${b.id}Value`]}
-                    helperText={(errors[`${b.id}Value`] as any)?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <Controller
-                          name={`${b.id}Unit`}
-                          control={control}
-                          render={({ field: unitField }) => (
-                            <TextField select {...unitField} variant="standard">
-                              {b.units.map((u) => (
-                                <MenuItem key={u.value} value={u.value}>
-                                  {u.label}
-                                </MenuItem>
-                              ))}
-                            </TextField>
-                          )}
-                        />
-                      ),
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-          ))}
-        </Grid>
+          {BIOMARKERS.map((b) => {
+            const currentUnit = watch(`${b.id}Unit` as keyof PhenoFormValues);
+            const unitMeta = b.units.find((u) => u.value === currentUnit);
+            const sliderMin = unitMeta?.min ?? 0;
+            const sliderMax = unitMeta?.max ?? 150;
 
-        <Button
-          sx={{ mt: 3 }}
-          variant="contained"
-          color="primary"
-          type="submit"
-          disabled={!isValid}
-        >
-          Beräkna
-        </Button>
+            return (
+              <Grid size={{ xs: 12, sm: 6 }} key={b.id}>
+                <Controller
+                  name={`${b.id}Value` as keyof PhenoFormValues}
+                  control={control}
+                  rules={{
+                    required: "Obligatoriskt",
+                    validate: (v) => {
+                      if (v === "" || isNaN(Number(v)))
+                        return "Måste vara ett tal";
+                      if (unitMeta) {
+                        if (+v < unitMeta.min)
+                          return `Måste vara minst ${unitMeta.min}`;
+                        if (+v > unitMeta.max)
+                          return `Får inte vara större än ${unitMeta.max}`;
+                      }
+                      return true;
+                    },
+                  }}
+                  render={({ field }) => {
+                    return (
+                      <>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <TextField
+                            {...field}
+                            label={b.label}
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            error={
+                              !!errors[`${b.id}Value` as keyof PhenoFormValues]
+                            }
+                            helperText={
+                              (
+                                errors[
+                                  `${b.id}Value` as keyof PhenoFormValues
+                                ] as any
+                              )?.message
+                            }
+                          />
+                          <Controller
+                            name={`${b.id}Unit` as keyof PhenoFormValues}
+                            control={control}
+                            render={({ field: unitField }) => {
+                              return (
+                                <TextField
+                                  select
+                                  {...unitField}
+                                  label="Enhet"
+                                  margin="dense"
+                                  sx={{ width: 100, ml: 1 }}
+                                >
+                                  {b.units.map((u) => (
+                                    <MenuItem key={u.value} value={u.value}>
+                                      {u.label}
+                                    </MenuItem>
+                                  ))}
+                                </TextField>
+                              );
+                            }}
+                          />
+                        </Box>
+                        <Slider
+                          value={Number(field.value)}
+                          onChange={(_, val) => field.onChange(val)}
+                          min={sliderMin}
+                          max={sliderMax}
+                          step={0.1}
+                          valueLabelDisplay="auto"
+                          marks={[
+                            { value: sliderMin, label: `${sliderMin}` },
+                            { value: sliderMax, label: `${sliderMax}` },
+                          ]}
+                          sx={{ mt: 1 }}
+                        />
+                      </>
+                    );
+                  }}
+                />
+              </Grid>
+            );
+          })}
+        </Grid>
       </Box>
 
       {result && (
@@ -203,9 +253,7 @@ export default function PhenoCalculator() {
             Kronologisk ålder: {result.chrono.toFixed(1)} år
           </Typography>
           <Typography>PhenoAge: {result.pheno.toFixed(1)} år</Typography>
-          <Typography>
-            Skillnad (Accel): {result.accel.toFixed(1)} år
-          </Typography>
+          <Typography>Skillnad: {result.accel.toFixed(1)} år</Typography>
 
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={[{ name: "Accel", värde: result.accel }]}>

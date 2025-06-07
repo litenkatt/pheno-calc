@@ -5,6 +5,8 @@ export interface BiomarkerDefinition {
     label: string;
     value: string;
     toModel: (v: number, ctx?: any) => number;
+    min: number;
+    max: number;
   }[];
 }
 
