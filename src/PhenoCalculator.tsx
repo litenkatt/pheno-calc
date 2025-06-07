@@ -7,6 +7,7 @@ import {
   CardContent,
   CardHeader,
   debounce,
+  Divider,
   Grid,
   MenuItem,
   Slider,
@@ -133,169 +134,200 @@ export default function PhenoCalculator() {
       <Typography variant="h5" gutterBottom>
         PhenoAge-kalkylator
       </Typography>
-
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <Grid container spacing={4}>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Card>
-              <CardHeader title="Kronologisk ålder" />
-              <CardContent>
-                <Controller
-                  name="birthDate"
-                  control={control}
-                  rules={{ required: "Obligatoriskt" }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      label="Födelsedatum"
-                      type="date"
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.birthDate}
-                      helperText={errors.birthDate?.message as string}
-                    />
-                  )}
-                />
-              </CardContent>
-            </Card>
-          </Grid>
-          {["Kidney", "Metabolic", "Inflammation", "Liver", "Immune"].map(
-            (group) => (
-              <Grid size={{ xs: 12, sm: 6 }} key={group}>
-                <Card>
-                  <CardHeader title={group} />
+      <Divider />
+      <Grid container spacing={4} sx={{ pt: 2 }}>
+        <Grid size={{ md: 12, lg: 6 }}>
+          <Typography variant="h5" gutterBottom>
+            Värden
+          </Typography>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <Grid container spacing={4}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Card
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                  }}
+                >
+                  <CardHeader title="Kronologisk ålder" />
                   <CardContent>
-                    {BIOMARKERS.filter((b) => b.group === group).map((b) => {
-                      const currentUnit = watch(
-                        `${b.id}Unit` as keyof PhenoFormValues
-                      );
-                      const unitMeta = b.units.find(
-                        (u) => u.value === currentUnit
-                      );
-                      const sliderMin = unitMeta?.min ?? 0;
-                      const sliderMax = unitMeta?.max ?? 150;
-
-                      return (
-                        <Controller
-                          key={b.id}
-                          name={`${b.id}Value` as keyof PhenoFormValues}
-                          control={control}
-                          rules={{
-                            required: "Obligatoriskt",
-                            validate: (v) => {
-                              if (v === "" || isNaN(Number(v)))
-                                return "Måste vara ett tal";
-                              if (unitMeta) {
-                                if (+v < unitMeta.min)
-                                  return `Måste vara minst ${unitMeta.min}`;
-                                if (+v > unitMeta.max)
-                                  return `Får inte vara större än ${unitMeta.max}`;
-                              }
-                              return true;
-                            },
-                          }}
-                          render={({ field }) => {
-                            return (
-                              <>
-                                <Box
-                                  sx={{ display: "flex", alignItems: "center" }}
-                                >
-                                  <TextField
-                                    {...field}
-                                    label={b.label}
-                                    type="number"
-                                    fullWidth
-                                    margin="dense"
-                                    error={
-                                      !!errors[
-                                        `${b.id}Value` as keyof PhenoFormValues
-                                      ]
-                                    }
-                                    helperText={
-                                      (
-                                        errors[
-                                          `${b.id}Value` as keyof PhenoFormValues
-                                        ] as any
-                                      )?.message
-                                    }
-                                  />
-                                  <Controller
-                                    name={
-                                      `${b.id}Unit` as keyof PhenoFormValues
-                                    }
-                                    control={control}
-                                    render={({ field: unitField }) => {
-                                      return (
-                                        <TextField
-                                          select
-                                          {...unitField}
-                                          label="Enhet"
-                                          margin="dense"
-                                          sx={{ width: 100, ml: 1 }}
-                                        >
-                                          {b.units.map((u) => (
-                                            <MenuItem
-                                              key={u.value}
-                                              value={u.value}
-                                            >
-                                              {u.label}
-                                            </MenuItem>
-                                          ))}
-                                        </TextField>
-                                      );
-                                    }}
-                                  />
-                                </Box>
-                                <Slider
-                                  value={Number(field.value)}
-                                  onChange={(_, val) => field.onChange(val)}
-                                  min={sliderMin}
-                                  max={sliderMax}
-                                  step={0.1}
-                                  valueLabelDisplay="auto"
-                                  marks={[
-                                    { value: sliderMin, label: `${sliderMin}` },
-                                    { value: sliderMax, label: `${sliderMax}` },
-                                  ]}
-                                  sx={{ mt: 1 }}
-                                />
-                              </>
-                            );
-                          }}
+                    <Controller
+                      name="birthDate"
+                      control={control}
+                      rules={{ required: "Obligatoriskt" }}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label="Födelsedatum"
+                          type="date"
+                          fullWidth
+                          margin="normal"
+                          error={!!errors.birthDate}
+                          helperText={errors.birthDate?.message as string}
+                          sx={{ mt: 1 }}
                         />
-                      );
-                    })}
+                      )}
+                    />
                   </CardContent>
                 </Card>
               </Grid>
-            )
+              {["Kidney", "Metabolic", "Inflammation", "Immune", "Liver"].map(
+                (group) => (
+                  <Grid size={{ xs: 12, sm: 6 }} key={group}>
+                    <Card>
+                      <CardHeader title={group} />
+                      <CardContent>
+                        {BIOMARKERS.filter((b) => b.group === group).map(
+                          (b) => {
+                            const currentUnit = watch(
+                              `${b.id}Unit` as keyof PhenoFormValues
+                            );
+                            const unitMeta = b.units.find(
+                              (u) => u.value === currentUnit
+                            );
+                            const sliderMin = unitMeta?.min ?? 0;
+                            const sliderMax = unitMeta?.max ?? 150;
+
+                            return (
+                              <Controller
+                                key={b.id}
+                                name={`${b.id}Value` as keyof PhenoFormValues}
+                                control={control}
+                                rules={{
+                                  required: "Obligatoriskt",
+                                  validate: (v) => {
+                                    if (v === "" || isNaN(Number(v)))
+                                      return "Måste vara ett tal";
+                                    if (unitMeta) {
+                                      if (+v < unitMeta.min)
+                                        return `Måste vara minst ${unitMeta.min}`;
+                                      if (+v > unitMeta.max)
+                                        return `Får inte vara större än ${unitMeta.max}`;
+                                    }
+                                    return true;
+                                  },
+                                }}
+                                render={({ field }) => {
+                                  return (
+                                    <>
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                        }}
+                                      >
+                                        <TextField
+                                          {...field}
+                                          label={b.label}
+                                          type="number"
+                                          fullWidth
+                                          margin="dense"
+                                          error={
+                                            !!errors[
+                                              `${b.id}Value` as keyof PhenoFormValues
+                                            ]
+                                          }
+                                          helperText={
+                                            (
+                                              errors[
+                                                `${b.id}Value` as keyof PhenoFormValues
+                                              ] as any
+                                            )?.message
+                                          }
+                                        />
+                                        <Controller
+                                          name={
+                                            `${b.id}Unit` as keyof PhenoFormValues
+                                          }
+                                          control={control}
+                                          render={({ field: unitField }) => {
+                                            return (
+                                              <TextField
+                                                select
+                                                {...unitField}
+                                                label="Enhet"
+                                                margin="dense"
+                                                sx={{ width: 100, ml: 1 }}
+                                              >
+                                                {b.units.map((u) => (
+                                                  <MenuItem
+                                                    key={u.value}
+                                                    value={u.value}
+                                                  >
+                                                    {u.label}
+                                                  </MenuItem>
+                                                ))}
+                                              </TextField>
+                                            );
+                                          }}
+                                        />
+                                      </Box>
+                                      <Slider
+                                        value={Number(field.value)}
+                                        onChange={(_, val) =>
+                                          field.onChange(val)
+                                        }
+                                        min={sliderMin}
+                                        max={sliderMax}
+                                        step={0.1}
+                                        valueLabelDisplay="auto"
+                                        marks={[
+                                          {
+                                            value: sliderMin,
+                                            label: `${sliderMin}`,
+                                          },
+                                          {
+                                            value: sliderMax,
+                                            label: `${sliderMax}`,
+                                          },
+                                        ]}
+                                        sx={{ mt: 1 }}
+                                      />
+                                    </>
+                                  );
+                                }}
+                              />
+                            );
+                          }
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                )
+              )}
+            </Grid>
+          </Box>
+        </Grid>
+        <Grid size={{ md: 12, lg: 6 }}>
+          <Typography variant="h5" gutterBottom>
+            Resultat
+          </Typography>
+          {result && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6">Resultat</Typography>
+              <Typography>
+                Kronologisk ålder: {result.chrono.toFixed(1)} år
+              </Typography>
+              <Typography>PhenoAge: {result.pheno.toFixed(1)} år</Typography>
+              <Typography>Skillnad: {result.accel.toFixed(1)} år</Typography>
+
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={[{ name: "Accel", värde: result.accel }]}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" hide />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar
+                    dataKey="värde"
+                    fill={result.accel < 0 ? "#4caf50" : "#e53935"}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
           )}
         </Grid>
-      </Box>
-
-      {result && (
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Resultat</Typography>
-          <Typography>
-            Kronologisk ålder: {result.chrono.toFixed(1)} år
-          </Typography>
-          <Typography>PhenoAge: {result.pheno.toFixed(1)} år</Typography>
-          <Typography>Skillnad: {result.accel.toFixed(1)} år</Typography>
-
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={[{ name: "Accel", värde: result.accel }]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" hide />
-              <YAxis />
-              <Tooltip />
-              <Bar
-                dataKey="värde"
-                fill={result.accel < 0 ? "#4caf50" : "#e53935"}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
-      )}
+      </Grid>
     </>
   );
 }
