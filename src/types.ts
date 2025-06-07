@@ -1,6 +1,7 @@
 export interface BiomarkerDefinition {
   id: string;
   label: string;
+  group: "Immune" | "Liver" | "Kidney" | "Metabolic" | "Inflammation";
   units: {
     label: string;
     value: string;

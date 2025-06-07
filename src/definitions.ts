@@ -33,6 +33,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "albumin",
     label: "Albumin",
+    group: "Liver",
     units: [
       { label: "g/L", value: "g_l", toModel: (v) => v, min: 25, max: 55 },
       { label: "g/dL", value: "g_dl", toModel: gdl_to_gL, min: 2.5, max: 5.5 },
@@ -41,6 +42,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "creatinine",
     label: "Kreatinin",
+    group: "Kidney",
     units: [
       {
         label: "µmol/L",
@@ -61,6 +63,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "glucose",
     label: "Glukos",
+    group: "Metabolic",
     units: [
       {
         label: "mmol/L",
@@ -81,6 +84,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "crp",
     label: "CRP (hs)",
+    group: "Inflammation",
     units: [
       { label: "mg/L", value: "mg_l", toModel: mgL_to_mgdl, min: 0, max: 20 },
       { label: "mg/dL", value: "mg_dl", toModel: (v) => v, min: 0, max: 2 },
@@ -89,6 +93,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "alp",
     label: "ALP",
+    group: "Liver",
     units: [
       { label: "U/L", value: "u_l", toModel: (v) => v, min: 20, max: 200 },
       {
@@ -103,6 +108,7 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
   {
     id: "lymph",
     label: "Lymfocyter",
+    group: "Immune",
     units: [
       { label: "%", value: "pct", toModel: (v) => v, min: 10, max: 60 },
       {
@@ -118,15 +124,18 @@ export const BIOMARKERS: BiomarkerDefinition[] = [
     id: "mcv",
     label: "MCV (fL)",
     units: [{ label: "fL", value: "fl", toModel: (v) => v, min: 70, max: 110 }],
+    group: "Immune",
   },
   {
     id: "rdw",
     label: "RDW (%)",
     units: [{ label: "%", value: "pct", toModel: (v) => v, min: 10, max: 20 }],
+    group: "Immune",
   },
   {
     id: "wbc",
     label: "WBC (vita)",
+    group: "Immune",
     units: [
       {
         label: "10^9/L",
