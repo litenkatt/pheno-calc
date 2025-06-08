@@ -237,7 +237,7 @@ export default function PhenoCalculator() {
                                                 {...unitField}
                                                 label="Unit"
                                                 margin="dense"
-                                                sx={{ width: 100, ml: 1 }}
+                                                sx={{ width: 150, ml: 1 }}
                                               >
                                                 {b.units.map((u) => (
                                                   <MenuItem
