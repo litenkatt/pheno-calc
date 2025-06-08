@@ -1,5 +1,5 @@
 {
-  "name": "phrno-calc",
+  "name": "pheno-calc",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,8 +16,7 @@
     "@mui/styled-engine": "^7.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-hook-form": "^7.56.4",
-    "recharts": "^2.15.3"
+    "react-hook-form": "^7.56.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

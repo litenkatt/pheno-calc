@@ -1,6 +1,3 @@
-// PhenoAgeCalculator.tsx (updated)
-// React component with visible validation feedback using React Hook Form + Material UI
-
 import {
   Box,
   Card,
@@ -16,17 +13,9 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { BIOMARKERS, defaultValues } from "./definitions";
-import type { PhenoFormValues } from "./types";
+import { BIOMARKERS, defaultValues } from "../definitions";
+import type { PhenoFormValues } from "../utils/types";
+import { ResultChart } from "./ResultChart";
 
 export default function PhenoCalculator() {
   const {
@@ -38,14 +27,13 @@ export default function PhenoCalculator() {
   } = useForm({ mode: "onChange", defaultValues });
 
   const [result, setResult] = useState<{
-    chrono: number;
-    pheno: number;
-    accel: number;
-  } | null>(null);
+    chrono: number | undefined;
+    pheno: number | undefined;
+    accel: number | undefined;
+  }>({ chrono: undefined, pheno: undefined, accel: undefined });
 
   const onSubmit = useCallback((data: PhenoFormValues) => {
     // Build a context with WBC first (needed for abs lymph conversion)
-    console.log(data);
     const wbcInputRaw = parseFloat(data["wbcValue"]);
     const wbcUnitKey = data["wbcUnit"];
     const wbcModel = BIOMARKERS.find((b) => b.id === "wbc")!
@@ -126,19 +114,20 @@ export default function PhenoCalculator() {
     const subscription = watch((data, { name }) => {
       if (name) debouncedSubmit(data as PhenoFormValues);
     });
+    debouncedSubmit(watch());
     return () => subscription.unsubscribe();
   }, [debouncedSubmit, watch, trigger]);
 
   return (
-    <>
-      <Typography variant="h5" gutterBottom>
-        PhenoAge-kalkylator
+    <Box sx={{ padding: 4 }}>
+      <Typography variant="h5" gutterBottom color="primary">
+        PhenoAge calculator
       </Typography>
-      <Divider />
+      <Divider color="primary" />
       <Grid container spacing={4} sx={{ pt: 2 }}>
         <Grid size={{ md: 12, lg: 6 }}>
-          <Typography variant="h5" gutterBottom>
-            Värden
+          <Typography variant="h5" gutterBottom color="primary">
+            Biomarkers
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Grid container spacing={4}>
@@ -150,7 +139,7 @@ export default function PhenoCalculator() {
                     height: "100%",
                   }}
                 >
-                  <CardHeader title="Kronologisk ålder" />
+                  <CardHeader title="Chronological age" />
                   <CardContent>
                     <Controller
                       name="birthDate"
@@ -159,13 +148,13 @@ export default function PhenoCalculator() {
                       render={({ field }) => (
                         <TextField
                           {...field}
-                          label="Födelsedatum"
+                          label="Birth date"
                           type="date"
                           fullWidth
                           margin="normal"
                           error={!!errors.birthDate}
                           helperText={errors.birthDate?.message as string}
-                          sx={{ mt: 1 }}
+                          sx={{ mt: 1, svg: "red", input: "red" }}
                         />
                       )}
                     />
@@ -300,34 +289,36 @@ export default function PhenoCalculator() {
           </Box>
         </Grid>
         <Grid size={{ md: 12, lg: 6 }}>
-          <Typography variant="h5" gutterBottom>
-            Resultat
+          <Typography variant="h5" gutterBottom color="primary">
+            Results
           </Typography>
-          {result && (
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h6">Resultat</Typography>
-              <Typography>
-                Kronologisk ålder: {result.chrono.toFixed(1)} år
-              </Typography>
-              <Typography>PhenoAge: {result.pheno.toFixed(1)} år</Typography>
-              <Typography>Skillnad: {result.accel.toFixed(1)} år</Typography>
+          <Card>
+            <CardContent>
+              <Grid
+                container
+                spacing={2}
+                direction={"column"}
+                justifyContent={"center"}
+              >
+                <Typography variant="h5" align="center">
+                  Chronological age
+                </Typography>
+                <Typography align="center">
+                  {result.chrono?.toFixed(1) ?? "-"} years
+                </Typography>
+                <Typography variant="h5" align="center">
+                  PhenoAge
+                </Typography>
+                <Typography align="center">
+                  {result.pheno?.toFixed(1) ?? "-"} years
+                </Typography>
 
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={[{ name: "Accel", värde: result.accel }]}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" hide />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar
-                    dataKey="värde"
-                    fill={result.accel < 0 ? "#4caf50" : "#e53935"}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </Box>
-          )}
+                <ResultChart accel={result.accel ?? 0} />
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
-    </>
+    </Box>
   );
 }

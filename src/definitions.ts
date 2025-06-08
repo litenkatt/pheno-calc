@@ -1,11 +1,11 @@
-import type { BiomarkerDefinition, PhenoFormValues } from "./types";
+import type { BiomarkerDefinition, PhenoFormValues } from "./utils/types";
 import {
   gdl_to_gL,
   mgdl_to_mmolL_gluc,
   mgdl_to_umolL,
   mgL_to_mgdl,
   ukatL_to_UL,
-} from "./utils";
+} from "./utils/utils";
 
 export const defaultValues: PhenoFormValues = {
   albuminValue: "42",
