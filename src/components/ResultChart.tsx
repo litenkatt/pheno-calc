@@ -14,7 +14,7 @@ export const ResultChart = ({ accel }: { accel: number }) => {
     <Box sx={{ mt: 2 }}>
       <Typography align="center" variant="h6">
         You are {Math.abs(clamped).toFixed(1)} years{" "}
-        {clamped < 0 ? "younger" : "older"} than your age
+        {clamped < 0 ? "younger" : "older"} than your chronological age
       </Typography>
 
       <Box

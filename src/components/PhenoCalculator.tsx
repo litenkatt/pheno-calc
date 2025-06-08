@@ -235,7 +235,7 @@ export default function PhenoCalculator() {
                                               <TextField
                                                 select
                                                 {...unitField}
-                                                label="Enhet"
+                                                label="Unit"
                                                 margin="dense"
                                                 sx={{ width: 100, ml: 1 }}
                                               >
