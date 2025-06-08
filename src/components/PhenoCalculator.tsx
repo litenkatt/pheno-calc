@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { BIOMARKERS, defaultValues } from "../definitions";
+import { BIOMARKERS, coefficiants, defaultValues } from "../utils/definitions";
 import type { PhenoFormValues } from "../utils/types";
 import { ResultChart } from "./ResultChart";
 
@@ -61,34 +61,19 @@ export default function PhenoCalculator() {
       return diff / (1000 * 60 * 60 * 24 * 365.25);
     })();
 
-    // Coefficients (Levine 2018)
-    const coef = {
-      albumin: -0.0336,
-      creatinine: 0.0095,
-      glucose: 0.1953,
-      crp: 0.0954,
-      lymph: -0.012,
-      mcv: 0.0268,
-      rdw: 0.3306,
-      alp: 0.0019,
-      wbc: 0.0554,
-      age: 0.0804,
-      b0: -19.9067,
-    };
-
     // Linear predictor xb
     const xb =
-      coef.albumin * modelVals.albumin +
-      coef.creatinine * modelVals.creatinine +
-      coef.glucose * modelVals.glucose +
-      coef.crp * Math.log(Math.max(modelVals.crp, 0.001)) + // ln(mg/dL)
-      coef.lymph * modelVals.lymph +
-      coef.mcv * modelVals.mcv +
-      coef.rdw * modelVals.rdw +
-      coef.alp * modelVals.alp +
-      coef.wbc * modelVals.wbc +
-      coef.age * ageYears +
-      coef.b0;
+      coefficiants.albumin * modelVals.albumin +
+      coefficiants.creatinine * modelVals.creatinine +
+      coefficiants.glucose * modelVals.glucose +
+      coefficiants.crp * Math.log(Math.max(modelVals.crp, 0.001)) + // ln(mg/dL)
+      coefficiants.lymph * modelVals.lymph +
+      coefficiants.mcv * modelVals.mcv +
+      coefficiants.rdw * modelVals.rdw +
+      coefficiants.alp * modelVals.alp +
+      coefficiants.wbc * modelVals.wbc +
+      coefficiants.age * ageYears +
+      coefficiants.b0;
 
     // Mortality score & PhenoAge
     const mort =
@@ -130,7 +115,7 @@ export default function PhenoCalculator() {
             Biomarkers
           </Typography>
           <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <Card
                   sx={{
@@ -187,12 +172,12 @@ export default function PhenoCalculator() {
                                   required: "Obligatoriskt",
                                   validate: (v) => {
                                     if (v === "" || isNaN(Number(v)))
-                                      return "Måste vara ett tal";
+                                      return "Must be a number";
                                     if (unitMeta) {
                                       if (+v < unitMeta.min)
-                                        return `Måste vara minst ${unitMeta.min}`;
+                                        return `Must be at least ${unitMeta.min}`;
                                       if (+v > unitMeta.max)
-                                        return `Får inte vara större än ${unitMeta.max}`;
+                                        return `Must not be larger than ${unitMeta.max}`;
                                     }
                                     return true;
                                   },
@@ -271,7 +256,7 @@ export default function PhenoCalculator() {
                                             label: `${sliderMax}`,
                                           },
                                         ]}
-                                        sx={{ mt: 1 }}
+                                        sx={{ mt: 1, mb: 4 }}
                                       />
                                     </>
                                   );

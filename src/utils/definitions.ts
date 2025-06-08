@@ -1,11 +1,26 @@
-import type { BiomarkerDefinition, PhenoFormValues } from "./utils/types";
+import type { BiomarkerDefinition, PhenoFormValues } from "./types";
 import {
   gdl_to_gL,
   mgdl_to_mmolL_gluc,
   mgdl_to_umolL,
   mgL_to_mgdl,
   ukatL_to_UL,
-} from "./utils/utils";
+} from "./utils";
+
+// Coefficients (Levine 2018)
+export const coefficiants = {
+  albumin: -0.0336,
+  creatinine: 0.0095,
+  glucose: 0.1953,
+  crp: 0.0954,
+  lymph: -0.012,
+  mcv: 0.0268,
+  rdw: 0.3306,
+  alp: 0.0019,
+  wbc: 0.0554,
+  age: 0.0804,
+  b0: -19.9067,
+};
 
 export const defaultValues: PhenoFormValues = {
   albuminValue: "42",
