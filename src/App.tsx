@@ -13,29 +13,6 @@ const theme = createTheme({
     secondary: purple,
     background: { default: "#000000" },
   },
-  components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          // backgroundColor: lime["100"],
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          // backgroundColor: purple["50"],
-        },
-      },
-    },
-    MuiFormControl: {
-      styleOverrides: {
-        root: {
-          backgroundColor: "#ffffff",
-        },
-      },
-    },
-  },
 });
 
 export default function App() {
