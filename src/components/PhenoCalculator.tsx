@@ -106,7 +106,7 @@ export default function PhenoCalculator() {
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h5" gutterBottom color="primary">
-        PhenoAge calculator
+        PhenoAge explorer
       </Typography>
       <Divider color="primary" />
       <Grid container spacing={4} sx={{ pt: 2 }}>
