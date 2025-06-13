@@ -14,21 +14,21 @@ export interface BiomarkerDefinition {
 export interface PhenoFormValues {
   birthDate: string;
   albuminValue: string;
-  albuminUnit: string;
+  albuminUnit: "g_l" | "g_dl";
   creatinineValue: string;
-  creatinineUnit: string;
+  creatinineUnit: "umol_l" | "mg_dl";
   glucoseValue: string;
-  glucoseUnit: string;
+  glucoseUnit: "mg_dl" | "mmol_l";
   crpValue: string;
-  crpUnit: string;
+  crpUnit: "mg_l" | "mg_dl";
   lymphValue: string;
-  lymphUnit: string;
+  lymphUnit: "pct" | "abs";
   mcvValue: string;
-  mcvUnit: string;
+  mcvUnit: "fl";
   rdwValue: string;
-  rdwUnit: string;
+  rdwUnit: "pct";
   alpValue: string;
-  alpUnit: string;
+  alpUnit: "ukat_l";
   wbcValue: string;
-  wbcUnit: string;
+  wbcUnit: "giga";
 }
